@@ -1,0 +1,39 @@
+# =============================================================================
+# RAG System — Python Dependencies
+# =============================================================================
+
+# --- Web Framework & API ---
+fastapi>=0.111,<0.116          # The API server
+uvicorn[standard]>=0.29,<0.35  # ASGI server to run FastAPI
+python-multipart>=0.0.9        # Support for file uploads in FastAPI
+
+# --- User Interface ---
+streamlit>=1.35.0              # Interactive web dashboard & chat UI
+
+# --- LangChain (RAG orchestration) ---
+langchain>=0.3,<0.4             # Core abstractions (chains, prompts, documents)
+langchain-openai>=0.2,<0.3      # OpenAI integration for LangChain
+langchain-community>=0.3,<0.4   # Community loaders and vectorstores
+
+# --- OpenAI ---
+openai>=1.30,<2.0               # OpenAI Python client
+
+# --- Vector Database ---
+faiss-cpu>=1.8.0                # In-memory & disk-persisted vector search (default)
+psycopg2-binary>=2.9.9          # PostgreSQL database adapter
+pgvector>=0.2.5                 # pgvector Python helper for PostgreSQL
+
+# --- PDF Processing ---
+pypdf>=4.0,<6.0                 # PDF parsing & text extraction
+
+# --- Config / Settings ---
+pydantic-settings>=2.2,<3.0     # Load settings from .env files
+python-dotenv>=1.0,<2.0         # .env file loader
+
+# --- Testing ---
+pytest>=8.0,<9.0                # Test runner
+pytest-asyncio>=0.23,<0.25      # Async test support for FastAPI
+httpx>=0.27,<0.29               # HTTP client for testing API endpoints
+
+# --- Math & Utilities ---
+numpy>=1.26,<2.0                # Vector math

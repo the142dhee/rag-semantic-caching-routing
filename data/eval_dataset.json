@@ -1,0 +1,152 @@
+[
+  {
+    "id": "q1_simple_chunking",
+    "question": "What is the configured chunk size and chunk overlap in the ingestion system?",
+    "expected_answer": "The chunk size is configured to 800 characters with an overlap of 100 characters.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 1)"],
+    "category": "simple_factual",
+    "is_answerable": true,
+    "expected_tier": "SIMPLE",
+    "variation_of": null
+  },
+  {
+    "id": "q2_simple_faiss_index",
+    "question": "What index type is utilized by FAISS for exact similarity search?",
+    "expected_answer": "FAISS employs an IndexFlatIP (Inner Product) structure with L2-normalized embeddings, mathematically identical to cosine similarity.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 2)"],
+    "category": "simple_factual",
+    "is_answerable": true,
+    "expected_tier": "SIMPLE",
+    "variation_of": null
+  },
+  {
+    "id": "q3_simple_ttl",
+    "question": "What is the Time-To-Live (TTL) for cache entries?",
+    "expected_answer": "The Time-To-Live (TTL) for cache entries is 86400 seconds (24 hours).",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 3)"],
+    "category": "simple_factual",
+    "is_answerable": true,
+    "expected_tier": "SIMPLE",
+    "variation_of": null
+  },
+  {
+    "id": "q4_variation_chunking",
+    "question": "What are the chunk size and overlap settings used for chunking text?",
+    "expected_answer": "The text chunking uses a chunk size of 800 characters and an overlap of 100 characters.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 1)"],
+    "category": "semantic_variation",
+    "is_answerable": true,
+    "expected_tier": "SIMPLE",
+    "variation_of": "q1_simple_chunking"
+  },
+  {
+    "id": "q5_variation_ttl",
+    "question": "How long do entries remain valid in the semantic cache before expiration?",
+    "expected_answer": "Cache entries have a Time-To-Live of 86400 seconds, which equals 24 hours.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 3)"],
+    "category": "semantic_variation",
+    "is_answerable": true,
+    "expected_tier": "SIMPLE",
+    "variation_of": "q3_simple_ttl"
+  },
+  {
+    "id": "q6_complex_caching_tradeoffs",
+    "question": "Analyze and compare the trade-offs between exact key-value caching and semantic caching in terms of hit rates, latency, and operational cost.",
+    "expected_answer": "Semantic caching allows hits on semantically equivalent queries using cosine similarity (threshold 0.90), whereas exact caching requires identical strings. Cache hits reduce latency to under 20ms and save 100% of LLM token costs.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 3)"],
+    "category": "complex_question",
+    "is_answerable": true,
+    "expected_tier": "COMPLEX",
+    "variation_of": null
+  },
+  {
+    "id": "q7_complex_router_economics",
+    "question": "Evaluate how the dual-tier routing architecture balances economic cost and answer quality between gpt-3.5-turbo and gpt-4o-mini.",
+    "expected_answer": "The router computes a complexity score from keyword density, query length, multi-part structure, and chunk count. Scores below 0.45 route to gpt-3.5-turbo for low cost, while scores of 0.45 or higher route to gpt-4o-mini for complex reasoning, achieving 40% to 60% cost reduction.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 4)"],
+    "category": "complex_question",
+    "is_answerable": true,
+    "expected_tier": "COMPLEX",
+    "variation_of": null
+  },
+  {
+    "id": "q8_multichunk_ingestion_faiss",
+    "question": "How does the document ingestion chunking process connect with FAISS vector indexing and collection hashing?",
+    "expected_answer": "Ingestion chunks text at 800 characters with 100 overlap and computes dense embeddings. FAISS indexes them using IndexFlatIP, and a unique collection ID hash is generated from document names and chunk counts to prevent cache contamination.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 1)", "rag_architecture_handbook.pdf (Page 2)"],
+    "category": "multi_chunk",
+    "is_answerable": true,
+    "expected_tier": "COMPLEX",
+    "variation_of": null
+  },
+  {
+    "id": "q9_multichunk_full_lifecycle",
+    "question": "Explain the complete lifecycle of a query from semantic cache lookup through FAISS retrieval to cost-aware model routing and telemetry logging.",
+    "expected_answer": "The query first checks the semantic cache (cosine similarity >= 0.90). On miss, FAISS retrieves top 4 chunks. The heuristic router calculates a complexity score (< 0.45 routes to SIMPLE, >= 0.45 routes to COMPLEX). The routed LLM generates the answer, which is stored in cache, and an end-to-end trace with a unique UUID is logged with telemetry.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 3)", "rag_architecture_handbook.pdf (Page 4)", "rag_architecture_handbook.pdf (Page 5)"],
+    "category": "multi_chunk",
+    "is_answerable": true,
+    "expected_tier": "COMPLEX",
+    "variation_of": null
+  },
+  {
+    "id": "q10_unanswerable_llama",
+    "question": "What is the recommended hyperparameter configuration for fine-tuning Llama-3 with LoRA and flash attention?",
+    "expected_answer": "I don't have enough information in the provided documents to answer that.",
+    "relevant_sources": [],
+    "category": "unanswerable",
+    "is_answerable": false,
+    "expected_tier": "SIMPLE",
+    "variation_of": null
+  },
+  {
+    "id": "q11_unanswerable_revenue",
+    "question": "How many employees work at OpenAI and what was their revenue in 2025?",
+    "expected_answer": "I don't have enough information in the provided documents to answer that.",
+    "relevant_sources": [],
+    "category": "unanswerable",
+    "is_answerable": false,
+    "expected_tier": "SIMPLE",
+    "variation_of": null
+  },
+  {
+    "id": "q12_routing_simple_threshold",
+    "question": "What is the default number of chunks retrieved per query?",
+    "expected_answer": "During query execution, the vector store retrieves the top-k most relevant chunks, where k defaults to 4.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 2)"],
+    "category": "routing_test",
+    "is_answerable": true,
+    "expected_tier": "SIMPLE",
+    "variation_of": null
+  },
+  {
+    "id": "q13_routing_complex_threshold",
+    "question": "Synthesize and evaluate the failure recovery mechanisms when LLM APIs time out versus when corrupt PDFs are ingested.",
+    "expected_answer": "Corrupted or unreadable PDFs are caught during ingestion with descriptive HTTP 422 errors. When an LLM API call fails or times out, the system returns a graceful error response rather than crashing.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 5)"],
+    "category": "routing_test",
+    "is_answerable": true,
+    "expected_tier": "COMPLEX",
+    "variation_of": null
+  },
+  {
+    "id": "q14_repeat_chunking",
+    "question": "What is the configured chunk size and chunk overlap in the ingestion system?",
+    "expected_answer": "The chunk size is configured to 800 characters with an overlap of 100 characters.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 1)"],
+    "category": "repeated_question",
+    "is_answerable": true,
+    "expected_tier": "SIMPLE",
+    "variation_of": "q1_simple_chunking"
+  },
+  {
+    "id": "q15_repeat_faiss",
+    "question": "What index type is utilized by FAISS for exact similarity search?",
+    "expected_answer": "FAISS employs an IndexFlatIP (Inner Product) structure with L2-normalized embeddings, mathematically identical to cosine similarity.",
+    "relevant_sources": ["rag_architecture_handbook.pdf (Page 2)"],
+    "category": "repeated_question",
+    "is_answerable": true,
+    "expected_tier": "SIMPLE",
+    "variation_of": "q2_simple_faiss_index"
+  }
+]

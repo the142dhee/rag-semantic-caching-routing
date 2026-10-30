@@ -1,0 +1,87 @@
+version: '3.8'
+
+# =============================================================================
+# Docker Compose — Semantic Caching & Cost-Aware Routing RAG System
+# =============================================================================
+# Services:
+#   1. backend   — FastAPI core gateway, FAISS vector store, semantic cache, LLM router
+#   2. frontend  — Streamlit interactive UI, chat assistant, telemetry observability
+#   3. postgres  — PostgreSQL 16 with pgvector extension (for production DB backend)
+# =============================================================================
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-test}
+      - LLM_MODEL=${LLM_MODEL:-gpt-3.5-turbo}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-ada-002}
+      - SEMANTIC_CACHE_ENABLED=${SEMANTIC_CACHE_ENABLED:-true}
+      - SIMILARITY_THRESHOLD=${SIMILARITY_THRESHOLD:-0.90}
+      - LLM_ROUTING_ENABLED=${LLM_ROUTING_ENABLED:-true}
+      - ROUTING_THRESHOLD=${ROUTING_THRESHOLD:-0.45}
+      - HYBRID_SEARCH_ENABLED=${HYBRID_SEARCH_ENABLED:-true}
+      - API_KEY_AUTH_ENABLED=${API_KEY_AUTH_ENABLED:-false}
+      - API_AUTH_KEY=${API_AUTH_KEY:-rag-secret-api-key}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-true}
+      - RATE_LIMIT_REQUESTS_PER_MINUTE=${RATE_LIMIT_REQUESTS_PER_MINUTE:-60}
+      - VECTOR_STORE_BACKEND=${VECTOR_STORE_BACKEND:-faiss}
+      - POSTGRES_CONNECTION_URL=${POSTGRES_CONNECTION_URL:-postgresql://postgres:postgres@postgres:5432/rag_db}
+    volumes:
+      - faiss_data:/app/faiss_index
+      - cache_data:/app/cache_data
+      - pdf_data:/app/data/pdfs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: rag_frontend
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE_URL=http://backend:8000/api/v1
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: rag_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: rag_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rag_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  faiss_data:
+  cache_data:
+  pdf_data:
+  postgres_data:
