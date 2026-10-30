@@ -296,8 +296,54 @@ Stage 6 introduces enterprise-grade retrieval capabilities and automated evaluat
 
 ---
 
-## 13. Limitations & Future Work
+## 13. Stage 7: Production Hardening, Docker & Deployment
+
+Stage 7 hardens the RAG system into a production-ready cloud deployment:
+
+### 1. Security & Sliding-Window Rate Limiting
+- **API Key Authentication**: Configurable header-based auth (`X-API-Key`) enforcing access control on all ingestion, query, and administrative endpoints.
+- **Sliding-Window Rate Limiter**: Thread-safe in-memory rate limiter tracking timestamps per client IP. Returns `HTTP 429 Too Many Requests` with a descriptive error payload upon exceeding quotas.
+- **Secret Hygiene**: Zero-leakage policy verified via pre-flight scanning and `.env.example` sanitization.
+
+### 2. High-Availability Health & Readiness Probes
+- `GET /health`: Liveness probe for orchestration platforms (Kubernetes / ECS).
+- `GET /ready`: Readiness probe verifying vector database index health, cache directory readiness, and backend dependencies.
+
+### 3. Dual Vector Store Architecture (FAISS + pgvector)
+- **Local Development**: In-memory FAISS with local disk persistence (`./faiss_index`).
+- **Production Cloud**: PostgreSQL with `pgvector` extension for distributed relational-vector storage, with automatic graceful fallback to FAISS when database connection strings are absent.
+
+### 4. Container Orchestration & Docker Compose
+- **Multi-Stage Dockerfiles**: Lean Python 3.11 slim images (`Dockerfile` for FastAPI backend, `Dockerfile.streamlit` for frontend).
+- **Docker Compose**: Orchestrates FastAPI backend, Streamlit dashboard, and PostgreSQL pgvector database with named persistent volumes, inter-service networking, and health checks.
+
+```bash
+# Launch full stack via Docker Compose
+docker-compose up --build
+```
+
+---
+
+## 14. Documentation Index
+
+Comprehensive guides and architectural specifications located in [`docs/`](./docs):
+
+| Document | Description | Path |
+|---|---|---|
+| **System Architecture** | Deep-dive architectural design, components, and request lifecycle | [`docs/architecture.md`](./docs/architecture.md) |
+| **Deployment Guide** | Docker Compose setup, Kubernetes manifests, security, and cloud configuration | [`docs/deployment-guide.md`](./docs/deployment-guide.md) |
+| **Benchmark Report** | Empirical benchmark data, latency percentiles, and cost reduction analysis | [`docs/benchmark-report.md`](./docs/benchmark-report.md) |
+| **Demo Walkthrough** | Step-by-step presentation script and live demo prompts | [`docs/demo-guide.md`](./docs/demo-guide.md) |
+| **Interview Preparation** | Technical Q&A covering caching, routing, vector search, and trade-offs | [`docs/interview-preparation.md`](./docs/interview-preparation.md) |
+| **Resume Bullets** | Quantified, recruiter-ready bullets highlighting technical accomplishments | [`docs/resume-bullets.md`](./docs/resume-bullets.md) |
+| **Evaluation Framework** | Deep-dive into Stage 5 evaluation criteria, ground truth dataset, and metrics | [`docs/evaluation.md`](./docs/evaluation.md) |
+| **Benchmarking Details** | Benchmarking methodology, baseline vs. optimized comparison | [`docs/benchmarking.md`](./docs/benchmarking.md) |
+
+---
+
+## 15. Limitations & Future Work
 
 1. **In-Memory Cache Scaling**: In-memory FAISS and JSON disk caches are suitable for single-node deployments; multi-instance horizontal scaling requires a distributed vector cache like Redis or Qdrant.
 2. **Persistent Redis Semantic Cache**: Support high-throughput distributed caching with native vector search (RediSearch).
 3. **Cross-Encoder Reranker**: Integrating a local cross-encoder model (e.g. `bge-reranker-large`) after RRF fusion for fine-grained semantic re-ranking.
+
